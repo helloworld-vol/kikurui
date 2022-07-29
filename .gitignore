@@ -33,3 +33,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# 自動生成されるファイルを格納するフォルダー
+/public/apis
