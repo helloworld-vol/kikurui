@@ -14,7 +14,7 @@
           "type",
           "unknown"
         ],
-        "lphabetize": {
+        "alphabetize": {
           "order": "asc"
         },
         "newlines-between": "always"
