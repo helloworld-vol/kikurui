@@ -34,5 +34,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# idea
+.idea
+
 # 自動生成されるファイルを格納するフォルダー
 /public/apis
