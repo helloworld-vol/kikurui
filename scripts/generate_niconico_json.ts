@@ -1,5 +1,16 @@
-import { generateNiconicoVideoInfosByTag } from "../src/apis/niconico";
+import fs from "fs/promises";
 
-generateNiconicoVideoInfosByTag("musyokutoumeisai", "無色透名祭")
-  .then(() => console.log("完了しました"))
-  .catch(console.error);
+import { getNiconicoVideoInfosByTagName } from "../src/apis/niconico";
+
+(async () => {
+  const id = "musyokutoumeisai";
+  const folder = `./public/apis/niconico/${id}`;
+
+  const result = await getNiconicoVideoInfosByTagName("無色透名祭");
+
+  await fs.mkdir(folder, { recursive: true });
+  await fs.writeFile(`${folder}/result.json`, JSON.stringify(result));
+
+  console.log("処理が完了しました");
+  console.log(`${result.totalCount}件のデータを取得しました`);
+})();
