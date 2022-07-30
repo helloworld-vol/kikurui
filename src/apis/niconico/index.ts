@@ -67,30 +67,17 @@ export const getVideoInfoFromNiconico = async (
   throw new Error(res.meta.errorMessage || "エラーが発生しました");
 };
 
-/**
- * ニコニコ動画検索APIの結果をファイルに出力する
- */
-export const generateNiconicoVideoInfos = async (
-  id: string,
-  query: NiconicoSearchQuery
-): Promise<NiconicoApiResponse> => {
-  const result = await getVideoInfoFromNiconico({ ...query });
-
-  const folder = `./public/apis/niconico/${id}/videos`;
-  const data = JSON.stringify(result.data);
-  const { _offset = 1, _limit = 1 } = query;
-  const page = Math.ceil(_offset / _limit);
-
-  await fs.mkdir(folder, { recursive: true });
-  await fs.writeFile(`${folder}/${page}.json`, data);
-
-  return result;
+type GetNiconicoVideoInfosByTagNameResult = {
+  totalCount: number;
+  data: NiconicoApiResponseData[];
 };
 
-export const generateNiconicoVideoInfosByTag = async (
-  id: string,
+/**
+ * タグ名からデータ一覧を取得する
+ */
+export const getNiconicoVideoInfosByTagName = async (
   tagName: string
-): Promise<void> => {
+): Promise<GetNiconicoVideoInfosByTagNameResult> => {
   const query = {
     q: tagName,
     targets: "tags",
@@ -101,19 +88,33 @@ export const generateNiconicoVideoInfosByTag = async (
       "contentId,title,description,userId,channelId,viewCounter,mylistCounter,likeCounter,lengthSeconds,thumbnailUrl,startTime,tags",
   };
 
-  const firstResult = await generateNiconicoVideoInfos(id, query);
+  let videos: NiconicoApiResponseData[] = [];
+  const firstResult = await getVideoInfoFromNiconico(query);
 
   const totalCount = firstResult.meta.totalCount || 1;
 
-  if (totalCount <= query._limit) return;
+  videos = videos.concat(firstResult.data);
 
-  const maxOffset = Math.ceil(totalCount / query._limit);
+  if (totalCount <= query._limit) {
+    return { data: videos, totalCount: videos.length };
+  }
 
-  for (let i = 1; i < maxOffset; i++) {
-    await generateNiconicoVideoInfos(id, {
+  const maxPage = Math.ceil(totalCount / query._limit);
+
+  for (let i = 1; i < maxPage; i++) {
+    console.log(`${query._limit * i}件を取得`);
+
+    const result = await getVideoInfoFromNiconico({
       ...query,
       _offset: i * query._limit,
     });
+
+    videos = videos.concat(result.data);
+
+    if (result.data.length < query._limit) break;
+
     await wait(3000); // Dos攻撃にならないよう３秒待つ
   }
+
+  return { data: videos, totalCount: videos.length };
 };
