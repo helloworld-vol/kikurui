@@ -1,15 +1,17 @@
 import fs from "fs/promises";
-import * as z from "zod";
+
 import fetch from "node-fetch";
+import * as z from "zod";
+
 import {
   NiconicoSearchQuery,
   NiconicoApiResponse,
   NiconicoApiResponseData,
 } from "./types";
-import { toZod } from "types";
+import { NICONICO_API_ROOT, NICONICO_VIDEOS_PER_PAGE } from "./variables";
 
-const NICONICO_API_ROOT =
-  "https://api.search.nicovideo.jp/api/v2/snapshot/video/contents/search";
+import { toZod } from "types";
+import { wait } from "utils/helpers";
 
 const iconicoApiResponseDataSchema = z.object<toZod<NiconicoApiResponseData>>({
   contentId: z.string(),
@@ -58,10 +60,6 @@ export const getVideoInfoFromNiconico = async (
 
   const result = await fetch(apiPath).then((r) => r.json());
 
-  console.log("============ RESULT ==============");
-  console.log({ apiPath, result });
-  console.log("============ RESULT ==============");
-
   const res = NicoNicoResponseSchema.parse(result);
 
   if (res.meta.status < 400) return res;
@@ -75,11 +73,47 @@ export const getVideoInfoFromNiconico = async (
 export const generateNiconicoVideoInfos = async (
   id: string,
   query: NiconicoSearchQuery
-) => {
-  const result = await getVideoInfoFromNiconico(query);
+): Promise<NiconicoApiResponse> => {
+  const result = await getVideoInfoFromNiconico({ ...query });
 
-  const folder = `./public/apis/niconico/${id}`;
+  const folder = `./public/apis/niconico/${id}/videos`;
+  const data = JSON.stringify(result.data);
+  const { _offset = 1, _limit = 1 } = query;
+  const page = Math.ceil(_offset / _limit);
 
   await fs.mkdir(folder, { recursive: true });
-  await fs.writeFile(`${folder}/videos.json`, JSON.stringify(result.data));
+  await fs.writeFile(`${folder}/${page}.json`, data);
+
+  return result;
+};
+
+export const generateNiconicoVideoInfosByTag = async (
+  id: string,
+  tagName: string
+): Promise<void> => {
+  const query = {
+    q: tagName,
+    targets: "tags",
+    _sort: "+startTime",
+    _offset: 0,
+    _limit: NICONICO_VIDEOS_PER_PAGE,
+    fields:
+      "contentId,title,description,userId,channelId,viewCounter,mylistCounter,likeCounter,lengthSeconds,thumbnailUrl,startTime,tags",
+  };
+
+  const firstResult = await generateNiconicoVideoInfos(id, query);
+
+  const totalCount = firstResult.meta.totalCount || 1;
+
+  if (totalCount <= query._limit) return;
+
+  const maxOffset = Math.ceil(totalCount / query._limit);
+
+  for (let i = 1; i < maxOffset; i++) {
+    await generateNiconicoVideoInfos(id, {
+      ...query,
+      _offset: i * query._limit,
+    });
+    await wait(3000); // Dos攻撃にならないよう３秒待つ
+  }
 };
