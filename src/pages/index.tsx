@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useState } from "react";
 import useSWRInfinite from "swr/infinite";
 
 import styles from "./index.module.scss";
@@ -6,45 +7,35 @@ import styles from "./index.module.scss";
 import type { NiconicoApiResponseData } from "apis/niconico/types";
 import type { GetStaticProps, NextPage } from "next";
 
-import { generateNiconicoVideoInfosByTag } from "apis/niconico";
-import { NICONICO_VIDEOS_PER_PAGE } from "apis/niconico/variables";
+import { getNiconicoVideoInfosByTagName } from "apis/niconico";
 
 interface HogePageProps {
   event: {
     id: string;
     name: string;
+    totalCount: number;
+    data: NiconicoApiResponseData[];
   };
 }
 
 const Home: NextPage<HogePageProps> = ({ event }) => {
-  const getKey = (offset: number, preData: NiconicoApiResponseData[]) => {
-    if (
-      preData &&
-      (!preData.length || preData.length < NICONICO_VIDEOS_PER_PAGE)
-    ) {
-      return null;
-    }
-
-    console.log({ offset, preData });
-
-    return `/apis/niconico/${event.id}/videos/${offset}.json`;
-  };
-
-  const fetcher = (path: string): Promise<NiconicoApiResponseData[]> => {
-    return fetch(path).then((r) => r.json());
-  };
-
-  const { data, size, setSize } = useSWRInfinite(getKey, fetcher);
-  const isLoading = !data;
-  const videos = data ? data.flat() : [];
+  const videos = event.data;
+  const [currentVideo, setCurrentVideo] =
+    useState<NiconicoApiResponseData | null>(videos[0] || null);
 
   return (
     <div>
       <h1>{event.name}の投稿作品一覧</h1>
+      {!!currentVideo && (
+        <iframe
+          width={600}
+          height={480}
+          style={{ background: "black" }}
+          src={`http://embed.nicovideo.jp/watch/${currentVideo.contentId}`}
+        ></iframe>
+      )}
 
       <ul>
-        {isLoading && <p>Loading ...</p>}
-
         {videos.map((video) => (
           <li key={video.contentId} className={styles.videoItem}>
             <div>
@@ -74,8 +65,6 @@ const Home: NextPage<HogePageProps> = ({ event }) => {
           </li>
         ))}
       </ul>
-
-      <button onClick={() => setSize(size + 1)}>更に読み込む</button>
     </div>
   );
 };
@@ -86,17 +75,28 @@ export const getStaticProps: GetStaticProps<HogePageProps> = async () => {
     name: "無色透名祭",
   };
 
-  // 不用意にリクエストするのを防ぐためにビルド時のみリクエストする
   if (process.env.NODE_ENV === "production") {
     // 静的なJSONファイルを出力
-    await generateNiconicoVideoInfosByTag(event.id, event.name);
-  } else {
-    // 開発環境の場合は `yarn generate:nico` を実行して生成する
+    const result = await getNiconicoVideoInfosByTagName(event.name);
+
+    return {
+      props: {
+        event: { ...event, ...result },
+      },
+    };
   }
+
+  const result = await import(
+    `../../public/apis/niconico/${event.id}/result.json`
+  );
 
   return {
     props: {
-      event,
+      event: {
+        ...event,
+        data: result?.data || [],
+        totalCount: result?.totalCount || 0,
+      },
     },
   };
 };
