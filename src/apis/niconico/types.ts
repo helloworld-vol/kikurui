@@ -106,3 +106,60 @@ export type NiconicoSearchQuery = {
    */
   // _context: string;
 };
+
+/**
+ * @example
+ * {
+ *   code: "possibly_deleted_video",
+ *   message: "この動画は表示できません\n現在視聴できないか、削除された可能性があります",
+ *   raw: undefined
+ * }
+ */
+export type NiconicoEmbedPlayerError = {
+  code: string;
+  message: string;
+  raw: any | undefined;
+};
+
+export type NiconicoEmbedLoadCompoleteEvent = {};
+
+export type NiconicoEmbedPlayerEvents = {
+  loadComplete: {
+    playerId: string;
+    eventName: "loadComplete";
+    data: {
+      videoInfo: {
+        commentCount: number;
+        description: string;
+        lengthInSeconds: number;
+        mylistCount: number;
+        postedAt: Date;
+        thumbnailUrl: string;
+        title: string;
+        videoId: string;
+        viewCount: number;
+        watchId: number;
+      };
+    };
+  };
+
+  playerStatusChange: {
+    playerId: string;
+    eventName: "playerStatusChange";
+    data: {
+      playerStatus: number;
+    };
+  };
+
+  statusChange: {
+    playerId: string;
+    eventName: "statusChange";
+    data: {
+      playerStatus: number;
+      seekStatus: number;
+    };
+  };
+};
+
+export type NiconicoEmbedPlayerEvent =
+  NiconicoEmbedPlayerEvents[keyof NiconicoEmbedPlayerEvents];

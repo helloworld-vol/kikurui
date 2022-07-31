@@ -10,6 +10,7 @@
     "generate:nico": "node -r esbuild-register ./scripts/generate_niconico_json.ts"
   },
   "dependencies": {
+    "clsx": "^1.2.1",
     "modern-normalize": "^1.1.0",
     "next": "12.2.3",
     "node-fetch": "^3.2.9",

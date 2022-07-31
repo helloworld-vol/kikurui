@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { useState } from "react";
-import useSWRInfinite from "swr/infinite";
+import { useEffect, useState } from "react";
 
 import styles from "./index.module.scss";
 
@@ -8,6 +7,8 @@ import type { NiconicoApiResponseData } from "apis/niconico/types";
 import type { GetStaticProps, NextPage } from "next";
 
 import { getNiconicoVideoInfosByTagName } from "apis/niconico";
+import { listenNiconicoEmbedPlayerEvent } from "apis/niconico/embed";
+import { NiconicoPlayer } from "components/NiconicoPlayer";
 
 interface HogePageProps {
   event: {
@@ -18,26 +19,95 @@ interface HogePageProps {
   };
 }
 
+type PlayHistory = {
+  history: { [key: string]: { timer: number } };
+};
+
+const getPlayHistory = (id: string): PlayHistory => {
+  try {
+    const data = localStorage.getItem(id) as string;
+    return data ? JSON.parse(data) : { history: {} };
+  } catch {
+    return { history: {} };
+  }
+};
+
 const Home: NextPage<HogePageProps> = ({ event }) => {
   const videos = event.data;
-  const [currentVideo, setCurrentVideo] =
-    useState<NiconicoApiResponseData | null>(videos[0] || null);
+  const playHistory = getPlayHistory(event.id).history;
+
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+
+  useEffect(() => {
+    let timer = 0;
+    let clearId: number | null = null;
+
+    const currentVideo = videos[currentVideoIndex];
+    const stopTimer = () => {
+      if (!clearId) return;
+
+      clearInterval(clearId);
+      console.log("タイマーSTOP", { timer });
+    };
+
+    const unsubcribe = listenNiconicoEmbedPlayerEvent({
+      onPlayed() {
+        clearId = window.setInterval(() => {
+          const threshold = 10; // Math.round(currentVideo.lengthSeconds / 7);
+
+          timer += 1;
+
+          console.log("タイマー更新！", { timer });
+
+          if (timer >= threshold) {
+            const store = getPlayHistory(event.id);
+
+            store.history = {
+              ...store.history,
+              [currentVideo.contentId]: { timer },
+            };
+
+            localStorage.setItem(event.id, JSON.stringify(store));
+            console.log("ローカルに保存しました", { store });
+          }
+        }, 1000);
+      },
+
+      onPaused() {
+        stopTimer();
+      },
+
+      onPlayEnd() {
+        const nextIndex = Math.min(currentVideoIndex + 1, videos.length - 1);
+
+        stopTimer();
+        setCurrentVideoIndex(nextIndex);
+      },
+    });
+
+    return () => {
+      unsubcribe();
+      stopTimer();
+    };
+  }, [event, videos, currentVideoIndex]);
 
   return (
     <div>
       <h1>{event.name}の投稿作品一覧</h1>
-      {!!currentVideo && (
-        <iframe
-          width={600}
-          height={480}
-          style={{ background: "black" }}
-          src={`http://embed.nicovideo.jp/watch/${currentVideo.contentId}`}
-        ></iframe>
+
+      <span>進捗度: {Math.round(currentVideoIndex / videos.length)}%</span>
+
+      {!!videos[currentVideoIndex] && (
+        <NiconicoPlayer videoId={videos[currentVideoIndex].contentId} />
       )}
 
       <ul>
-        {videos.map((video) => (
-          <li key={video.contentId} className={styles.videoItem}>
+        {videos.map((video, i) => (
+          <li
+            key={video.contentId}
+            className={styles.videoItem}
+            onClick={() => setCurrentVideoIndex(i)}
+          >
             <div>
               <Image
                 src={video.thumbnailUrl}
@@ -48,13 +118,10 @@ const Home: NextPage<HogePageProps> = ({ event }) => {
             </div>
 
             <div>
-              <a
-                href={`https://nico.ms/${video.contentId}`}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-              >
+              <div>
                 {video.title}
-              </a>
+                {!!playHistory[video.contentId] && <span>再生済み</span>}
+              </div>
 
               <div>
                 <span>再生数: {video.viewCounter}</span>
