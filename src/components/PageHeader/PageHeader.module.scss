@@ -1,0 +1,49 @@
+.pageHeader {
+  padding: 21px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  align-items: centre;
+  justify-content: space-between;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.logo {
+  width: 28px;
+  height: 28px;
+}
+
+.title {
+  padding-left: 8px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.navi {
+  display: flex;
+  align-items: center;
+}
+
+.naviItem {
+  font-size: 1.2rems;
+  font-weight: 700;
+  transition: color 0.15s;
+
+  & + & {
+    margin-left: 16px;
+  }
+
+  &:hover {
+    color: var(--light-green);
+  }
+}

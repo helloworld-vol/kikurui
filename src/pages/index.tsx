@@ -9,6 +9,7 @@ import type { GetStaticProps, NextPage } from "next";
 import { getNiconicoVideoInfosByTagName } from "apis/niconico";
 import { listenNiconicoEmbedPlayerEvent } from "apis/niconico/embed";
 import { NiconicoPlayer } from "components/NiconicoPlayer";
+import { PageHeader } from "components/PageHeader";
 
 interface HogePageProps {
   event: {
@@ -34,8 +35,6 @@ const getPlayHistory = (id: string): PlayHistory => {
 
 const Home: NextPage<HogePageProps> = ({ event }) => {
   const videos = event.data;
-  const playHistory = getPlayHistory(event.id).history;
-
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   useEffect(() => {
@@ -93,6 +92,8 @@ const Home: NextPage<HogePageProps> = ({ event }) => {
 
   return (
     <div>
+      <PageHeader />
+
       <h1>{event.name}の投稿作品一覧</h1>
 
       <span>進捗度: {Math.round(currentVideoIndex / videos.length)}%</span>
@@ -118,10 +119,7 @@ const Home: NextPage<HogePageProps> = ({ event }) => {
             </div>
 
             <div>
-              <div>
-                {video.title}
-                {!!playHistory[video.contentId] && <span>再生済み</span>}
-              </div>
+              <div>{video.title}</div>
 
               <div>
                 <span>再生数: {video.viewCounter}</span>
@@ -153,16 +151,17 @@ export const getStaticProps: GetStaticProps<HogePageProps> = async () => {
     };
   }
 
-  const result = await import(
-    `../../public/apis/niconico/${event.id}/result.json`
-  );
+  /* 警告が出るのでコメントアウトしておく */
+  // const result = await import(
+  //   `../../public/apis/niconico/${event.id}/result.json`
+  // );
 
   return {
     props: {
       event: {
         ...event,
-        data: result?.data || [],
-        totalCount: result?.totalCount || 0,
+        data: [],
+        totalCount: 0,
       },
     },
   };
