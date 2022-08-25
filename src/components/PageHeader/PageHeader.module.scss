@@ -1,12 +1,13 @@
 .pageHeader {
-  padding: 21px 0;
+  padding: 21px;
   display: flex;
   justify-content: center;
 }
 
 .container {
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px;
+  padding: 0 1.5rem;
   display: flex;
   align-items: centre;
   justify-content: space-between;

@@ -1,3 +1,21 @@
+.container {
+  margin: auto;
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  padding: 3.5rem 1.5rem;
+}
+
+.playerContainer {
+  width: 100%;
+  max-width: 800px;
+}
+
+.playlist {
+  width: 300px;
+  margin-left: 32px;
+}
+
 .sumitButton {
   color: white;
   font-weight: bold;

@@ -1,20 +1,31 @@
-import { NiconicoEmbedPlayerEvents } from "apis/niconico/types";
+import styles from "./NiconicoPlayer.module.scss";
 
 /** 埋め込みプレイヤーを操作するためのID */
 const NICONICO_EMBED_PLAYER_ID = "kikurui-niconico-embed-id";
 
 type NiconicoPlayerProps = {
+  width?: string | number;
+  height?: string | number;
   /** 'smxxxx'のような文字列 */
-  videoId: string;
+  videoId?: string;
 };
 
-export const NiconicoPlayer = ({ videoId }: NiconicoPlayerProps) => {
+export const NiconicoPlayer = ({
+  videoId,
+  width,
+  height,
+}: NiconicoPlayerProps) => {
   return (
     <iframe
-      width={600}
-      height={480}
+      className={styles.player}
+      width={width}
+      height={height}
       style={{ background: "black" }}
-      src={`https://embed.nicovideo.jp/watch/${videoId}?jsapi=1&playerId=${NICONICO_EMBED_PLAYER_ID}`}
+      src={
+        videoId
+          ? `https://embed.nicovideo.jp/watch/${videoId}?jsapi=1&playerId=${NICONICO_EMBED_PLAYER_ID}`
+          : void 0
+      }
     ></iframe>
   );
 };
