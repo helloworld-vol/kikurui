@@ -11,25 +11,14 @@
   max-width: 800px;
 }
 
-.playlist {
-  width: 300px;
+.sideMenu {
+  width: 400px;
   margin-left: 32px;
 }
 
-.sumitButton {
-  color: white;
-  font-weight: bold;
-  padding: 8px 16px;
-  background-color: rgb(68, 142, 255);
-  border-radius: 8px;
-}
-
-.videoItem {
-  display: flex;
-  padding: 8px 16px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(224, 224, 224, 0.3);
-  }
+.sideMenuHeader {
+  padding-bottom: 16px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-light-gray);
 }

@@ -7,6 +7,11 @@ export type toZod<T extends Record<string, any>> = {
 };
 
 /**
+ * 分かりやすくするために Video 型として定義する
+ */
+export interface Video extends NiconicoApiResponseData {}
+
+/**
  * ニコニコ動画で開催される祭の情報
  * @note イベント(event)だと分かりにくくなる可能性があるので祭(Festival)にしている
  */
@@ -14,5 +19,5 @@ export interface Festival {
   id: string;
   name: string;
   totalCount: number;
-  videos: NiconicoApiResponseData[];
+  videos: Video[];
 }

@@ -1,10 +1,11 @@
 import * as z from "zod";
 
-import { Festival } from "types";
+import { Festival, Video } from "types";
 import { getLocalStorageValue } from "utils/helpers";
 
 export type PlayHistory = z.infer<typeof PlayHistorySchema>;
 export type PlayHistories = z.infer<typeof PlayHistoriesSchema>;
+export type StoreItem = z.infer<typeof StoreItemSchema>;
 
 export const PlayHistorySchema = z.object({
   contentId: z.string(),
@@ -13,14 +14,21 @@ export const PlayHistorySchema = z.object({
 
 export const PlayHistoriesSchema = z.record(PlayHistorySchema.optional());
 
-/**
- * 保存されている再生履歴情報を返す
- */
-export const getPlayHistories = (festivalId: Festival["id"]): PlayHistories => {
-  const playHistories = getLocalStorageValue(festivalId);
-  const result = PlayHistoriesSchema.safeParse(playHistories);
+export const StoreItemSchema = z.object({
+  playHistories: PlayHistoriesSchema,
+  favoriteVideos: z.string().array(),
+});
 
-  return result.success ? result.data : {};
+/**
+ * ローカルに保存していたデータを取得する
+ */
+export const getStoreItem = (festivalId: Festival["id"]): StoreItem => {
+  const item = getLocalStorageValue(festivalId);
+  const result = StoreItemSchema.safeParse(item);
+
+  return result.success
+    ? result.data
+    : { playHistories: {}, favoriteVideos: [] };
 };
 
 /**
@@ -30,9 +38,20 @@ export const savePlayHistory = (
   festivalId: Festival["id"],
   history: PlayHistory
 ) => {
-  const histories = getPlayHistories(festivalId);
+  const item = getStoreItem(festivalId);
 
-  histories[history.contentId] = history;
+  item.playHistories[history.contentId] = history;
 
-  localStorage.setItem(festivalId, JSON.stringify(histories));
+  localStorage.setItem(festivalId, JSON.stringify(item));
+};
+
+/**
+ * お気に入りの動画を保存する
+ */
+export const saveFavoriteVideo = (festivalId: Festival["id"], video: Video) => {
+  const item = getStoreItem(festivalId);
+
+  item.favoriteVideos.push(video.contentId);
+
+  localStorage.setItem(festivalId, JSON.stringify(item));
 };

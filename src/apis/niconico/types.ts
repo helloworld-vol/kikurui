@@ -57,6 +57,7 @@ export type NiconicoApiResponse = {
   };
   data: NiconicoApiResponseData[];
 };
+
 /**
  * ニコニコの検索APIのクエリ
  * @from https://site.nicovideo.jp/search-api-docs/snapshot

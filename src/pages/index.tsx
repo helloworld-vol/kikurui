@@ -7,9 +7,10 @@ import type { GetStaticProps, NextPage } from "next";
 import type { Festival } from "types";
 
 import { getNiconicoVideoInfosByTagName } from "apis/niconico";
-import { getPlayHistories, savePlayHistory } from "apis/store";
+import { saveFavoriteVideo, savePlayHistory } from "apis/store";
 import { NiconicoPlayer } from "components/NiconicoPlayer";
 import { PageHeader } from "components/PageHeader";
+import { PlayList } from "components/PlayList";
 import { useNiconicoPlayerTimer } from "hooks/useNiconicoPlayerTimer";
 
 interface HogePageProps {
@@ -44,43 +45,19 @@ const Home: NextPage<HogePageProps> = ({ festival }) => {
           <NiconicoPlayer videoId={videos[currentVideoIndex]?.contentId} />
         </div>
 
-        <div className={styles.playlist}>
+        <div className={styles.sideMenu}>
           <div>
-            <span>進捗度</span>
+            <header className={styles.sideMenuHeader}>
+              <span>プレイリスト</span>
+            </header>
+
+            <PlayList
+              videos={videos}
+              favoriteVideoIds={[]}
+              onSelected={(_, index) => setCurrentVideoIndex(index)}
+              onFavorited={(video) => saveFavoriteVideo(festival.id, video)}
+            />
           </div>
-
-          <div>
-            <span>プレイリスト</span>
-          </div>
-
-          <ul>
-            {videos.map((video, i) => (
-              <li
-                key={video.contentId}
-                className={styles.videoItem}
-                onClick={() => setCurrentVideoIndex(i)}
-              >
-                <div>
-                  <Image
-                    src={video.thumbnailUrl}
-                    alt="Landscape picture"
-                    width={130}
-                    height={100}
-                  />
-                </div>
-
-                <div>
-                  <div>{video.title}</div>
-
-                  <div>
-                    <span>再生数: {video.viewCounter}</span>
-                    <span>いいね数: {video.likeCounter}</span>
-                    <span>マイリスト数: {video.mylistCounter}</span>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
         </div>
       </main>
     </div>
@@ -117,7 +94,57 @@ export const getStaticProps: GetStaticProps<HogePageProps> = async () => {
     props: {
       festival: {
         ...festival,
-        videos: [],
+        // サンプルデータ
+        videos: [
+          {
+            contentId: "so40837119",
+            title: "ひとりぼっち／初音ミク",
+            description:
+              "【無色透名祭】参加作品です。<br>https://site.nicovideo.jp/mushokutomeisai/<br>",
+            viewCounter: 6160,
+            mylistCounter: 54,
+            likeCounter: 206,
+            lengthSeconds: 150,
+            thumbnailUrl:
+              "https://nicovideo.cdn.nimg.jp/thumbnails/40837119/40837119.39201325",
+            startTime: "2022-07-28T18:00:00+09:00",
+            tags: "VOCALOID ひとりぼっち ミクオリジナル曲 優しいミクうた 初音ミク 無色透名祭",
+            userId: null,
+            channelId: 2648319,
+          },
+          {
+            contentId: "so40836614",
+            title: "ラビリンス / 初音ミク",
+            description:
+              "【無色透名祭】参加作品です。<br>https://site.nicovideo.jp/mushokutomeisai/<br>",
+            viewCounter: 11816,
+            mylistCounter: 651,
+            likeCounter: 1133,
+            lengthSeconds: 198,
+            thumbnailUrl:
+              "https://nicovideo.cdn.nimg.jp/thumbnails/40836614/40836614.91772428",
+            startTime: "2022-07-28T18:00:00+09:00",
+            tags: "VOCALOID 初音ミクオリジナル曲 初音ミク オリジナル曲 無色透名祭 良調教 ラビリンス 疾走感 ミクオリジナル曲 VOCAROCK もっと評価されるべき",
+            userId: null,
+            channelId: 2648319,
+          },
+          {
+            contentId: "so40820450",
+            title: "ミラーミラー / 可不",
+            description:
+              "【無色透名祭】参加作品です。<br>https://site.nicovideo.jp/mushokutomeisai/<br>",
+            viewCounter: 3851,
+            mylistCounter: 276,
+            likeCounter: 322,
+            lengthSeconds: 158,
+            thumbnailUrl:
+              "https://nicovideo.cdn.nimg.jp/thumbnails/40820450/40820450.42883966",
+            startTime: "2022-07-28T18:00:00+09:00",
+            tags: "CeVIOオリジナル曲 cevio新曲リンク VOCALOID VOCAROCK ボカロオリジナル曲 リリースカットピアノ 可不 可不オリジナル曲 無色透名祭",
+            userId: null,
+            channelId: 2648319,
+          },
+        ],
         totalCount: 0,
       },
     },

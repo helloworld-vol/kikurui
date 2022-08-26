@@ -1,0 +1,60 @@
+.playlist {
+}
+
+.playlistItem {
+  position: relative;
+  display: flex;
+  padding: 12px 4px;
+  padding-top: 24px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--border-light-gray);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.thumbnail {
+  width: 100%;
+  max-width: 100px;
+  border-radius: 5px;
+  position: relative;
+  aspect-ratio: 13 / 10;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+.videoInfo {
+  padding-left: 8px;
+}
+
+.videoInfoContainer {
+  margin-top: 8px;
+}
+
+.videoInfoItem {
+  display: flex;
+  align-items: center;
+  color: var(--gray);
+  font-size: 0.75rem;
+}
+
+.videoTitle {
+  font-weight: 700;
+}
+
+.favoButton {
+  position: absolute;
+  right: 0;
+  bottom: 8px;
+  color: var(--gray);
+}
+
+.favorited {
+  fill: rgb(240, 188, 45);
+}
