@@ -1,16 +1,19 @@
 import styles from "./NiconicoPlayer.module.scss";
 
-/** 埋め込みプレイヤーを操作するためのID */
-const NICONICO_EMBED_PLAYER_ID = "kikurui-niconico-embed-id";
-
 type NiconicoPlayerProps = {
+  /** 埋め込みプレイヤーを操作するためのID */
+  playerId: string;
+
   width?: string | number;
+
   height?: string | number;
+
   /** 'smxxxx'のような文字列 */
   videoId?: string;
 };
 
 export const NiconicoPlayer = ({
+  playerId,
   videoId,
   width,
   height,
@@ -23,7 +26,7 @@ export const NiconicoPlayer = ({
       style={{ background: "black" }}
       src={
         videoId
-          ? `https://embed.nicovideo.jp/watch/${videoId}?jsapi=1&playerId=${NICONICO_EMBED_PLAYER_ID}`
+          ? `https://embed.nicovideo.jp/watch/${videoId}?jsapi=1&playerId=${playerId}`
           : void 0
       }
     ></iframe>

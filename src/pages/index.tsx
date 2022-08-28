@@ -43,7 +43,10 @@ const Player: React.FC<PlayerProps> = ({ festival }) => {
 
       <main className={styles.container}>
         <div className={styles.playerContainer}>
-          <NiconicoPlayer videoId={currentVideo?.contentId} />
+          <NiconicoPlayer
+            playerId={festival.id}
+            videoId={currentVideo?.contentId}
+          />
 
           <div className={styles.videoDetails}>
             <h2 className={styles.videoTitle}>

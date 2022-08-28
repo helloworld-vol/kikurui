@@ -1,6 +1,6 @@
 import { NiconicoEmbedPlayerEvent, NiconicoEmbedPlayerEvents } from "./types";
 
-type EmbedCallbacks = {
+export type EmbedCallbacks = {
   onLoad?: (event: NiconicoEmbedPlayerEvents["loadComplete"]) => void;
   onReady?: (event: NiconicoEmbedPlayerEvents["playerStatusChange"]) => void;
   onPlayed?: (event: NiconicoEmbedPlayerEvents["playerStatusChange"]) => void;
