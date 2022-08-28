@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 
 import styles from "./index.module.scss";
@@ -6,24 +6,52 @@ import styles from "./index.module.scss";
 import type { GetStaticProps, NextPage } from "next";
 import type { Festival, FestivalMeta, Video } from "types";
 
+import { sendEventToNiconicoEmbedPlayer } from "apis/niconico/embed";
 import { saveFavoriteVideo, savePlayHistory } from "apis/store";
 import { NiconicoPlayer } from "components/NiconicoPlayer";
 import { PageHeader } from "components/PageHeader";
 import { PlayList } from "components/PlayList";
 import { useFetchFestival } from "hooks/useFetchFestival";
+import { useListenNiconicoPlayerEvent } from "hooks/useListenNiconicoPlayerEvent";
 import { useNiconicoPlayerTimer } from "hooks/useNiconicoPlayerTimer";
 
 /** 再生履歴として保存する再生時間の閾値(秒) */
 const PLAY_HISTORY_SAVE_THRESHOLD = 30;
 
-interface PlayerProps {
+interface PlayerPageProps {
   festival: Festival;
 }
 
-const Player: React.FC<PlayerProps> = ({ festival }) => {
+const PlayerPage: React.FC<PlayerPageProps> = ({ festival }) => {
   const { videos } = festival;
+  const ref = useRef({ isStarted: false as boolean });
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const currentVideo: Video | undefined = videos[currentVideoIndex];
+
+  useListenNiconicoPlayerEvent(
+    {
+      onLoad() {
+        if (ref.current.isStarted) {
+          sendEventToNiconicoEmbedPlayer(festival.id, {
+            eventName: "play",
+            sourceConnectorType: 1,
+            playerId: festival.id,
+          });
+        }
+      },
+
+      onPlayed: () => {
+        ref.current.isStarted = true;
+      },
+
+      onPlayEnd: () => {
+        setCurrentVideoIndex((index) => {
+          return Math.min(index + 1, videos.length);
+        });
+      },
+    },
+    [videos.length]
+  );
 
   useNiconicoPlayerTimer({
     onStopTimer: (timer) => {
@@ -91,7 +119,7 @@ const Home: NextPage<HogePageProps> = ({ festival }) => {
   if (isError) return <p>Error !!!!</p>;
   if (!videos) return <p>Loading ....</p>;
 
-  return <Player festival={{ ...festival, videos, totalCount }} />;
+  return <PlayerPage festival={{ ...festival, videos, totalCount }} />;
 };
 
 export const getStaticProps: GetStaticProps<HogePageProps> = async () => {

@@ -1,5 +1,13 @@
 import { NiconicoEmbedPlayerEvent, NiconicoEmbedPlayerEvents } from "./types";
 
+/**
+ * ニコニコ動画の埋め込みプレイヤーのオリジンURL
+ */
+export const NICONICO_EMBED_PLAYER_ORIGIN = "https://embed.nicovideo.jp";
+
+/**
+ * `listenNiconicoEmbedPlayerEvent`の引数型
+ */
 export type EmbedCallbacks = {
   onLoad?: (event: NiconicoEmbedPlayerEvents["loadComplete"]) => void;
   onReady?: (event: NiconicoEmbedPlayerEvents["playerStatusChange"]) => void;
@@ -8,9 +16,12 @@ export type EmbedCallbacks = {
   onPlayEnd?: (event: NiconicoEmbedPlayerEvents["playerStatusChange"]) => void;
 };
 
+/**
+ * ニコニコ動画の埋め込みプレイヤーのイベントを受け取る関数を設定する
+ */
 export const listenNiconicoEmbedPlayerEvent = (callbacks: EmbedCallbacks) => {
   const onMessage = (event: MessageEvent) => {
-    if (event.origin !== "https://embed.nicovideo.jp") return;
+    if (event.origin !== NICONICO_EMBED_PLAYER_ORIGIN) return;
 
     const embedEvent = event.data as NiconicoEmbedPlayerEvent;
 
@@ -51,4 +62,21 @@ export const listenNiconicoEmbedPlayerEvent = (callbacks: EmbedCallbacks) => {
   return () => {
     window.removeEventListener("message", onMessage);
   };
+};
+
+/**
+ * ニコニコ動画の埋め込みプレイヤーへイベントを送信する
+ */
+export const sendEventToNiconicoEmbedPlayer = (
+  playerId: string,
+  event: NiconicoEmbedPlayerEvent
+) => {
+  const player = document.getElementById(playerId);
+
+  if (player instanceof HTMLIFrameElement && player.contentWindow) {
+    player.contentWindow.postMessage(event, NICONICO_EMBED_PLAYER_ORIGIN);
+    return;
+  }
+
+  throw new Error("送信先の埋め込みプレイヤーがありませんでした");
 };

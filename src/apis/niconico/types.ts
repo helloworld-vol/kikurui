@@ -122,8 +122,9 @@ export type NiconicoEmbedPlayerError = {
   raw: any | undefined;
 };
 
-export type NiconicoEmbedLoadCompoleteEvent = {};
-
+/**
+ * ニコニコ動画の埋め込みプレイヤーのイベントをまとめた型
+ */
 export type NiconicoEmbedPlayerEvents = {
   loadComplete: {
     playerId: string;
@@ -160,7 +161,49 @@ export type NiconicoEmbedPlayerEvents = {
       seekStatus: number;
     };
   };
+
+  play: {
+    eventName: "play";
+    playerId: string;
+    sourceConnectorType: number;
+  };
+
+  pause: {
+    eventName: "pause";
+    playerId: string;
+    sourceConnectorType: number;
+  };
+
+  mute: {
+    eventName: "mute";
+    playerId: string;
+    sourceConnectorType: number;
+    data: {
+      mute: boolean;
+    };
+  };
+
+  seek: {
+    eventName: "seek";
+    playerId: string;
+    sourceConnectorType: number;
+    data: {
+      time: number;
+    };
+  };
+
+  volumeChange: {
+    eventName: "volumeChange";
+    playerId: string;
+    sourceConnectorType: number;
+    data: {
+      volume: number;
+    };
+  };
 };
 
+/**
+ * ニコニコ動画の埋め込みプレイヤーイベントの Union 型
+ */
 export type NiconicoEmbedPlayerEvent =
   NiconicoEmbedPlayerEvents[keyof NiconicoEmbedPlayerEvents];

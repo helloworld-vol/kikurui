@@ -20,6 +20,7 @@ export const NiconicoPlayer = ({
 }: NiconicoPlayerProps) => {
   return (
     <iframe
+      id={playerId}
       className={styles.player}
       width={width}
       height={height}
