@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  pageExtensions: ["page.tsx", "page.ts"],
   images: {
     domains: ["nicovideo.cdn.nimg.jp"],
     disableStaticImages: true,
